@@ -1,0 +1,1892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plant Care Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+    <style>
+        :root {
+            --sage: #8B9A7E;
+            --dark-sage: #6B7A5E;
+            --cream: #F8F6F1;
+            --charcoal: #2C2C2C;
+            --soft-black: #1A1A1A;
+            --accent-terra: #C4876B;
+            --light-sage: #A8B89D;
+            --border: #E0DED6;
+            --warning: #D97757;
+            --success: #7A9B6F;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--cream);
+            color: var(--charcoal);
+            line-height: 1.6;
+        }
+
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: var(--soft-black);
+            color: var(--cream);
+            padding: 2rem 2rem 1.5rem;
+            border-bottom: 3px solid var(--sage);
+        }
+
+        .header h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2.5rem;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-subtitle {
+            font-size: 0.9rem;
+            color: var(--light-sage);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* Navigation */
+        .top-nav {
+            background: white;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+        }
+
+        .main-nav {
+            display: flex;
+            gap: 2rem;
+            padding: 0 2rem;
+            border-right: 1px solid var(--border);
+        }
+
+        .main-nav-item {
+            padding: 1.25rem 0;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--charcoal);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .main-nav-item:hover {
+            color: var(--sage);
+        }
+
+        .main-nav-item.active {
+            color: var(--sage);
+            border-bottom-color: var(--sage);
+        }
+
+        .room-tabs {
+            padding: 0 2rem;
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            flex: 1;
+        }
+
+        .room-tab {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: var(--charcoal);
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .room-tab:hover {
+            color: var(--sage);
+            background: rgba(139, 154, 126, 0.05);
+        }
+
+        .room-tab.active {
+            color: var(--sage);
+            border-bottom-color: var(--sage);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Room View */
+        .room-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .room-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--soft-black);
+        }
+
+        .page-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--soft-black);
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .add-plant-btn {
+            background: var(--sage);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(139, 154, 126, 0.2);
+        }
+
+        .add-plant-btn:hover {
+            background: var(--dark-sage);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(139, 154, 126, 0.3);
+        }
+
+        /* Plant Grid */
+        .plant-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .plant-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .plant-card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .plant-card-header {
+            padding: 1.25rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .plant-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--soft-black);
+            margin-bottom: 0.25rem;
+        }
+
+        .plant-location {
+            font-size: 0.85rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .plant-card-body {
+            padding: 1.25rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.35rem 0.85rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .status-great {
+            background: rgba(122, 155, 111, 0.15);
+            color: var(--success);
+        }
+
+        .status-okay {
+            background: rgba(196, 135, 107, 0.15);
+            color: var(--accent-terra);
+        }
+
+        .status-attention {
+            background: rgba(217, 119, 87, 0.15);
+            color: var(--warning);
+        }
+
+        .plant-info {
+            display: grid;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .plant-info-row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .plant-info-label {
+            font-weight: 500;
+            color: #666;
+        }
+
+        /* Quick Watering Mode */
+        .watering-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 2rem;
+        }
+
+        .watering-item {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.25rem;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .watering-item:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .watering-item.checked {
+            background: rgba(122, 155, 111, 0.08);
+            border-color: var(--success);
+        }
+
+        .watering-checkbox {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: var(--sage);
+        }
+
+        .watering-info {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .watering-plant-name {
+            font-weight: 600;
+            color: var(--soft-black);
+        }
+
+        .watering-room {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .watering-amount {
+            color: var(--sage);
+            font-weight: 500;
+        }
+
+        .watering-last {
+            font-size: 0.85rem;
+            color: #999;
+        }
+
+        .water-all-btn {
+            background: var(--sage);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-top: 1.5rem;
+        }
+
+        .water-all-btn:hover {
+            background: var(--dark-sage);
+        }
+
+        .water-all-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Calendar */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .calendar-day {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            min-height: 150px;
+        }
+
+        .calendar-date {
+            font-weight: 600;
+            color: var(--soft-black);
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .calendar-date.today {
+            color: var(--sage);
+        }
+
+        .calendar-plant-item {
+            padding: 0.5rem;
+            background: rgba(139, 154, 126, 0.1);
+            border-left: 3px solid var(--sage);
+            border-radius: 3px;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .calendar-plant-name {
+            font-weight: 500;
+            color: var(--soft-black);
+        }
+
+        .calendar-plant-amount {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        /* Actions Dashboard */
+        .actions-grid {
+            display: grid;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .action-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--warning);
+            border-radius: 6px;
+            padding: 1.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .action-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .action-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .action-plant-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--soft-black);
+        }
+
+        .action-room-tag {
+            background: var(--cream);
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .action-list-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .action-list-item {
+            padding-left: 1rem;
+            position: relative;
+            color: var(--charcoal);
+        }
+
+        .action-list-item:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--warning);
+            font-weight: bold;
+        }
+
+        /* Care Guide */
+        .care-guide {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .guide-section {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .guide-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--soft-black);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--sage);
+        }
+
+        .guide-symptom {
+            margin-bottom: 2rem;
+        }
+
+        .guide-symptom:last-child {
+            margin-bottom: 0;
+        }
+
+        .guide-symptom-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--soft-black);
+            margin-bottom: 0.5rem;
+        }
+
+        .guide-symptom-desc {
+            color: #555;
+            margin-bottom: 0.75rem;
+            line-height: 1.7;
+        }
+
+        .guide-causes {
+            background: rgba(196, 135, 107, 0.08);
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 0.75rem;
+        }
+
+        .guide-causes-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--accent-terra);
+            margin-bottom: 0.5rem;
+        }
+
+        .guide-actions {
+            background: rgba(122, 155, 111, 0.08);
+            padding: 1rem;
+            border-radius: 6px;
+        }
+
+        .guide-actions-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--success);
+            margin-bottom: 0.5rem;
+        }
+
+        .guide-list {
+            margin-left: 1.25rem;
+            line-height: 1.7;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 12px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 2rem 2rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .modal-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--soft-black);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn:hover {
+            background: var(--cream);
+            color: var(--charcoal);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        /* Form */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--charcoal);
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--sage);
+            box-shadow: 0 0 0 3px rgba(139, 154, 126, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--sage);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--dark-sage);
+        }
+
+        .btn-secondary {
+            background: var(--cream);
+            color: var(--charcoal);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: #eee;
+        }
+
+        .btn-danger {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c76848;
+        }
+
+        /* Plant Detail View */
+        .detail-section {
+            margin-bottom: 2rem;
+        }
+
+        .detail-section-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--soft-black);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--sage);
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .detail-item {
+            padding: 1rem;
+            background: var(--cream);
+            border-radius: 6px;
+        }
+
+        .detail-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #666;
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            font-weight: 500;
+            color: var(--soft-black);
+        }
+
+        .actions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .action-item {
+            padding: 0.75rem 1rem;
+            background: rgba(217, 119, 87, 0.1);
+            border-left: 3px solid var(--warning);
+            border-radius: 4px;
+            color: var(--charcoal);
+        }
+
+        .no-plants {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #999;
+        }
+
+        .no-plants-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .no-plants-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .watering-info {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .calendar-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 1.5rem 1rem 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .top-nav {
+                flex-direction: column;
+            }
+
+            .main-nav {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                overflow-x: auto;
+            }
+
+            .room-tabs {
+                padding: 0 1rem;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
+            .plant-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal {
+                margin: 1rem;
+            }
+
+            .modal-header,
+            .modal-body {
+                padding: 1.5rem;
+            }
+
+            .calendar-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Sample initial data
+        const SAMPLE_DATA = {
+            rooms: [
+                { id: 'lobby', name: 'Lobby' },
+                { id: 'coworking', name: 'Coworking Area' },
+                { id: 'cafe', name: 'Cafe' },
+                { id: 'restaurant', name: 'Restaurant' },
+                { id: 'meeting-rooms', name: 'Meeting Rooms' }
+            ],
+            plants: []
+        };
+
+        function App() {
+            const [mainView, setMainView] = useState('rooms'); // 'rooms', 'watering', 'calendar', 'actions', 'guide'
+            const [rooms, setRooms] = useState([]);
+            const [plants, setPlants] = useState([]);
+            const [activeRoom, setActiveRoom] = useState('');
+            const [showModal, setShowModal] = useState(false);
+            const [editingPlant, setEditingPlant] = useState(null);
+            const [viewingPlant, setViewingPlant] = useState(null);
+            const [selectedForWatering, setSelectedForWatering] = useState(new Set());
+
+            // Load data from storage
+            useEffect(() => {
+                loadData();
+            }, []);
+
+            // Save data to storage whenever it changes
+            useEffect(() => {
+                if (rooms.length > 0) {
+                    saveData();
+                }
+            }, [rooms, plants]);
+
+            const loadData = async () => {
+                try {
+                    const roomsResult = await window.storage.get('plant-tracker-rooms');
+                    const plantsResult = await window.storage.get('plant-tracker-plants');
+                    
+                    const loadedRooms = roomsResult ? JSON.parse(roomsResult.value) : SAMPLE_DATA.rooms;
+                    const loadedPlants = plantsResult ? JSON.parse(plantsResult.value) : SAMPLE_DATA.plants;
+                    
+                    setRooms(loadedRooms);
+                    setPlants(loadedPlants);
+                    setActiveRoom(loadedRooms[0]?.id || '');
+                } catch (error) {
+                    // First time loading, use sample data
+                    setRooms(SAMPLE_DATA.rooms);
+                    setPlants(SAMPLE_DATA.plants);
+                    setActiveRoom(SAMPLE_DATA.rooms[0]?.id || '');
+                }
+            };
+
+            const saveData = async () => {
+                try {
+                    await window.storage.set('plant-tracker-rooms', JSON.stringify(rooms));
+                    await window.storage.set('plant-tracker-plants', JSON.stringify(plants));
+                } catch (error) {
+                    console.error('Error saving data:', error);
+                }
+            };
+
+            const currentRoomPlants = plants.filter(p => p.roomId === activeRoom);
+
+            const handleAddPlant = () => {
+                setEditingPlant(null);
+                setShowModal(true);
+            };
+
+            const handleEditPlant = (plant) => {
+                setEditingPlant(plant);
+                setShowModal(true);
+            };
+
+            const handleViewPlant = (plant) => {
+                setViewingPlant(plant);
+            };
+
+            const handleSavePlant = (plantData) => {
+                if (editingPlant) {
+                    // Update existing plant
+                    setPlants(plants.map(p => p.id === editingPlant.id ? { ...plantData, id: editingPlant.id } : p));
+                } else {
+                    // Add new plant
+                    const newPlant = {
+                        ...plantData,
+                        id: Date.now().toString()
+                    };
+                    setPlants([...plants, newPlant]);
+                }
+                setShowModal(false);
+                setEditingPlant(null);
+            };
+
+            const handleDeletePlant = (plantId) => {
+                if (confirm('Are you sure you want to delete this plant?')) {
+                    setPlants(plants.filter(p => p.id !== plantId));
+                    setViewingPlant(null);
+                }
+            };
+
+            const handleWaterSelected = () => {
+                const today = new Date().toISOString().split('T')[0];
+                const updatedPlants = plants.map(p => {
+                    if (selectedForWatering.has(p.id)) {
+                        return { ...p, lastWatered: today };
+                    }
+                    return p;
+                });
+                setPlants(updatedPlants);
+                setSelectedForWatering(new Set());
+            };
+
+            return (
+                <div className="app-container">
+                    <header className="header">
+                        <h1>Plant Care Tracker</h1>
+                        <div className="header-subtitle">Coworking Space & Cafe</div>
+                    </header>
+
+                    <nav className="top-nav">
+                        <div className="main-nav">
+                            <button
+                                className={`main-nav-item ${mainView === 'rooms' ? 'active' : ''}`}
+                                onClick={() => setMainView('rooms')}
+                            >
+                                Rooms
+                            </button>
+                            <button
+                                className={`main-nav-item ${mainView === 'watering' ? 'active' : ''}`}
+                                onClick={() => setMainView('watering')}
+                            >
+                                Quick Water
+                            </button>
+                            <button
+                                className={`main-nav-item ${mainView === 'calendar' ? 'active' : ''}`}
+                                onClick={() => setMainView('calendar')}
+                            >
+                                Calendar
+                            </button>
+                            <button
+                                className={`main-nav-item ${mainView === 'actions' ? 'active' : ''}`}
+                                onClick={() => setMainView('actions')}
+                            >
+                                Actions
+                            </button>
+                            <button
+                                className={`main-nav-item ${mainView === 'guide' ? 'active' : ''}`}
+                                onClick={() => setMainView('guide')}
+                            >
+                                Care Guide
+                            </button>
+                        </div>
+
+                        {mainView === 'rooms' && (
+                            <div className="room-tabs">
+                                {rooms.map(room => (
+                                    <button
+                                        key={room.id}
+                                        className={`room-tab ${activeRoom === room.id ? 'active' : ''}`}
+                                        onClick={() => setActiveRoom(room.id)}
+                                    >
+                                        {room.name}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </nav>
+
+                    <main className="main-content">
+                        {mainView === 'rooms' && (
+                            <RoomView
+                                room={rooms.find(r => r.id === activeRoom)}
+                                plants={currentRoomPlants}
+                                onAddPlant={handleAddPlant}
+                                onViewPlant={handleViewPlant}
+                            />
+                        )}
+
+                        {mainView === 'watering' && (
+                            <WateringView
+                                plants={plants}
+                                rooms={rooms}
+                                selectedForWatering={selectedForWatering}
+                                setSelectedForWatering={setSelectedForWatering}
+                                onWaterSelected={handleWaterSelected}
+                            />
+                        )}
+
+                        {mainView === 'calendar' && (
+                            <CalendarView plants={plants} rooms={rooms} />
+                        )}
+
+                        {mainView === 'actions' && (
+                            <ActionsView plants={plants} rooms={rooms} onViewPlant={handleViewPlant} />
+                        )}
+
+                        {mainView === 'guide' && (
+                            <CareGuideView />
+                        )}
+                    </main>
+
+                    {showModal && (
+                        <PlantFormModal
+                            plant={editingPlant}
+                            roomId={activeRoom}
+                            onSave={handleSavePlant}
+                            onClose={() => {
+                                setShowModal(false);
+                                setEditingPlant(null);
+                            }}
+                        />
+                    )}
+
+                    {viewingPlant && (
+                        <PlantDetailModal
+                            plant={viewingPlant}
+                            onEdit={() => {
+                                handleEditPlant(viewingPlant);
+                                setViewingPlant(null);
+                            }}
+                            onDelete={() => handleDeletePlant(viewingPlant.id)}
+                            onClose={() => setViewingPlant(null)}
+                        />
+                    )}
+                </div>
+            );
+        }
+
+        function RoomView({ room, plants, onAddPlant, onViewPlant }) {
+            return (
+                <>
+                    <div className="room-header">
+                        <h2 className="room-title">{room?.name || ''}</h2>
+                        <button className="add-plant-btn" onClick={onAddPlant}>
+                            + Add Plant
+                        </button>
+                    </div>
+
+                    {plants.length === 0 ? (
+                        <div className="no-plants">
+                            <div className="no-plants-icon">🌱</div>
+                            <div className="no-plants-text">No plants in this room yet</div>
+                            <p>Click "Add Plant" to start tracking plants in this space</p>
+                        </div>
+                    ) : (
+                        <div className="plant-grid">
+                            {plants.map(plant => (
+                                <PlantCard
+                                    key={plant.id}
+                                    plant={plant}
+                                    onClick={() => onViewPlant(plant)}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </>
+            );
+        }
+
+        function WateringView({ plants, rooms, selectedForWatering, setSelectedForWatering, onWaterSelected }) {
+            const toggleSelection = (plantId) => {
+                const newSelection = new Set(selectedForWatering);
+                if (newSelection.has(plantId)) {
+                    newSelection.delete(plantId);
+                } else {
+                    newSelection.add(plantId);
+                }
+                setSelectedForWatering(newSelection);
+            };
+
+            return (
+                <>
+                    <h2 className="page-title">Quick Watering</h2>
+                    {plants.length === 0 ? (
+                        <div className="no-plants">
+                            <div className="no-plants-icon">💧</div>
+                            <div className="no-plants-text">No plants to water yet</div>
+                            <p>Add some plants first to track watering</p>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="watering-list">
+                                {plants.map(plant => {
+                                    const room = rooms.find(r => r.id === plant.roomId);
+                                    const isChecked = selectedForWatering.has(plant.id);
+                                    return (
+                                        <div key={plant.id} className={`watering-item ${isChecked ? 'checked' : ''}`}>
+                                            <input
+                                                type="checkbox"
+                                                className="watering-checkbox"
+                                                checked={isChecked}
+                                                onChange={() => toggleSelection(plant.id)}
+                                            />
+                                            <div className="watering-info">
+                                                <div>
+                                                    <div className="watering-plant-name">{plant.name}</div>
+                                                    <div className="watering-room">{room?.name} • {plant.location}</div>
+                                                </div>
+                                                <div className="watering-amount">
+                                                    {plant.waterAmount || 'Amount not set'}
+                                                </div>
+                                                <div>{plant.wateringFrequency}</div>
+                                                <div className="watering-last">
+                                                    Last: {plant.lastWatered || 'Never'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <button
+                                className="water-all-btn"
+                                onClick={onWaterSelected}
+                                disabled={selectedForWatering.size === 0}
+                            >
+                                Water {selectedForWatering.size} Selected Plant{selectedForWatering.size !== 1 ? 's' : ''}
+                            </button>
+                        </>
+                    )}
+                </>
+            );
+        }
+
+        function CalendarView({ plants, rooms }) {
+            const getNextWeek = () => {
+                const days = [];
+                const today = new Date();
+                for (let i = 0; i < 7; i++) {
+                    const date = new Date(today);
+                    date.setDate(today.getDate() + i);
+                    days.push(date);
+                }
+                return days;
+            };
+
+            const getWateringFrequencyDays = (frequency) => {
+                const map = {
+                    'Weekly': 7,
+                    'Bi-weekly': 14,
+                    'Every 3 days': 3,
+                    'Every 10 days': 10,
+                    'Monthly': 30
+                };
+                return map[frequency] || 7;
+            };
+
+            const shouldWaterOnDate = (plant, date) => {
+                if (!plant.lastWatered) return false;
+                
+                const lastWatered = new Date(plant.lastWatered);
+                const daysSinceWatered = Math.floor((date - lastWatered) / (1000 * 60 * 60 * 24));
+                const frequency = getWateringFrequencyDays(plant.wateringFrequency);
+                
+                return daysSinceWatered >= frequency && daysSinceWatered < frequency + 7;
+            };
+
+            const week = getNextWeek();
+            const today = new Date().toDateString();
+
+            return (
+                <>
+                    <h2 className="page-title">Watering Calendar</h2>
+                    <div className="calendar-grid">
+                        {week.map(date => {
+                            const plantsToWater = plants.filter(p => shouldWaterOnDate(p, date));
+                            const isToday = date.toDateString() === today;
+                            
+                            return (
+                                <div key={date.toISOString()} className="calendar-day">
+                                    <div className={`calendar-date ${isToday ? 'today' : ''}`}>
+                                        {date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                                    </div>
+                                    {plantsToWater.map(plant => (
+                                        <div key={plant.id} className="calendar-plant-item">
+                                            <div className="calendar-plant-name">{plant.name}</div>
+                                            <div className="calendar-plant-amount">{plant.waterAmount || 'Amount not set'}</div>
+                                        </div>
+                                    ))}
+                                    {plantsToWater.length === 0 && (
+                                        <div style={{ color: '#999', fontSize: '0.85rem', fontStyle: 'italic' }}>
+                                            No watering needed
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </>
+            );
+        }
+
+        function ActionsView({ plants, rooms, onViewPlant }) {
+            const plantsWithActions = plants.filter(p => p.actionNeeded && p.actionNeeded.trim());
+
+            return (
+                <>
+                    <h2 className="page-title">Action Dashboard</h2>
+                    {plantsWithActions.length === 0 ? (
+                        <div className="no-plants">
+                            <div className="no-plants-icon">✅</div>
+                            <div className="no-plants-text">No actions needed</div>
+                            <p>All plants are in good shape!</p>
+                        </div>
+                    ) : (
+                        <div className="actions-grid">
+                            {plantsWithActions.map(plant => {
+                                const room = rooms.find(r => r.id === plant.roomId);
+                                const actions = plant.actionNeeded.split('\n').filter(a => a.trim());
+                                
+                                return (
+                                    <div key={plant.id} className="action-card" onClick={() => onViewPlant(plant)}>
+                                        <div className="action-card-header">
+                                            <div className="action-plant-name">{plant.name}</div>
+                                            <div className="action-room-tag">{room?.name}</div>
+                                        </div>
+                                        <div className="action-list-items">
+                                            {actions.map((action, idx) => (
+                                                <div key={idx} className="action-list-item">{action}</div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </>
+            );
+        }
+
+        function CareGuideView() {
+            return (
+                <div className="care-guide">
+                    <h2 className="page-title">Plant Care Guide</h2>
+                    
+                    <div className="guide-section">
+                        <h3 className="guide-title">Common Issues & Solutions</h3>
+                        
+                        <div className="guide-symptom">
+                            <div className="guide-symptom-title">🍂 Yellow Leaves</div>
+                            <p className="guide-symptom-desc">
+                                Yellowing leaves are one of the most common plant issues and can indicate several different problems.
+                            </p>
+                            <div className="guide-causes">
+                                <div className="guide-causes-title">Possible Causes:</div>
+                                <ul className="guide-list">
+                                    <li>Overwatering - Most common cause; roots sitting in water</li>
+                                    <li>Underwatering - Soil completely dried out</li>
+                                    <li>Nutrient deficiency - Especially nitrogen</li>
+                                    <li>Natural aging - Lower, older leaves yellowing is normal</li>
+                                    <li>Poor drainage - Water not draining properly</li>
+                                </ul>
+                            </div>
+                            <div className="guide-actions">
+                                <div className="guide-actions-title">Suggested Actions:</div>
+                                <ul className="guide-list">
+                                    <li>Check soil moisture before watering - stick finger 2 inches deep</li>
+                                    <li>Ensure pot has drainage holes</li>
+                                    <li>Adjust watering schedule based on soil dryness</li>
+                                    <li>Consider fertilizing if not done recently</li>
+                                    <li>Remove yellow leaves - they won't turn green again</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div className="guide-symptom">
+                            <div className="guide-symptom-title">🥀 Dry or Crispy Leaves</div>
+                            <p className="guide-symptom-desc">
+                                Brown, crispy leaf edges or tips indicate the plant is losing moisture faster than it can replace it.
+                            </p>
+                            <div className="guide-causes">
+                                <div className="guide-causes-title">Possible Causes:</div>
+                                <ul className="guide-list">
+                                    <li>Low humidity - Common in heated/air-conditioned spaces</li>
+                                    <li>Underwatering - Soil drying out too much</li>
+                                    <li>Too much direct sun - Scorching the leaves</li>
+                                    <li>Salt/mineral buildup from tap water or over-fertilizing</li>
+                                    <li>Heat stress from nearby vents or radiators</li>
+                                </ul>
+                            </div>
+                            <div className="guide-actions">
+                                <div className="guide-actions-title">Suggested Actions:</div>
+                                <ul className="guide-list">
+                                    <li>Increase humidity with a pebble tray or humidifier</li>
+                                    <li>Move plant away from direct harsh sunlight</li>
+                                    <li>Water more consistently - don't let soil completely dry out</li>
+                                    <li>Use filtered or room-temperature water</li>
+                                    <li>Trim crispy parts with clean scissors</li>
+                                    <li>Relocate away from heating/cooling vents</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div className="guide-symptom">
+                            <div className="guide-symptom-title">😔 Drooping or Wilting</div>
+                            <p className="guide-symptom-desc">
+                                Droopy, limp leaves that look sad indicate the plant's cells are not properly hydrated.
+                            </p>
+                            <div className="guide-causes">
+                                <div className="guide-causes-title">Possible Causes:</div>
+                                <ul className="guide-list">
+                                    <li>Underwatering - Most common; dry soil</li>
+                                    <li>Overwatering - Root rot preventing water uptake</li>
+                                    <li>Root bound - Plant has outgrown its pot</li>
+                                    <li>Temperature shock - Sudden temperature changes</li>
+                                    <li>Transplant shock - Recently moved or repotted</li>
+                                </ul>
+                            </div>
+                            <div className="guide-actions">
+                                <div className="guide-actions-title">Suggested Actions:</div>
+                                <ul className="guide-list">
+                                    <li>Check soil - if dry, water thoroughly until it drains</li>
+                                    <li>If soil is wet, check for root rot (see below)</li>
+                                    <li>Ensure consistent temperature (avoid drafts)</li>
+                                    <li>If root bound, consider repotting to larger container</li>
+                                    <li>Be patient with recently moved plants - they need adjustment time</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div className="guide-symptom">
+                            <div className="guide-symptom-title">🦠 Root Rot</div>
+                            <p className="guide-symptom-desc">
+                                Root rot is a serious condition caused by fungus that thrives in overly wet soil, making roots unable to absorb water and nutrients.
+                            </p>
+                            <div className="guide-causes">
+                                <div className="guide-causes-title">Signs of Root Rot:</div>
+                                <ul className="guide-list">
+                                    <li>Mushy, black, or brown roots (healthy roots are white/tan and firm)</li>
+                                    <li>Foul smell from soil</li>
+                                    <li>Wilting despite wet soil</li>
+                                    <li>Yellow leaves and stunted growth</li>
+                                    <li>Soft, mushy base of stem</li>
+                                </ul>
+                            </div>
+                            <div className="guide-actions">
+                                <div className="guide-actions-title">Suggested Actions:</div>
+                                <ul className="guide-list">
+                                    <li>Remove plant from pot and inspect roots</li>
+                                    <li>Cut away all brown, mushy roots with sterile scissors</li>
+                                    <li>Rinse remaining healthy roots gently</li>
+                                    <li>Repot in fresh, well-draining soil</li>
+                                    <li>Use pot with drainage holes</li>
+                                    <li>Reduce watering frequency going forward</li>
+                                    <li>If severely rotted, take healthy cuttings to propagate</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div className="guide-symptom">
+                            <div className="guide-symptom-title">🐛 Pests</div>
+                            <p className="guide-symptom-desc">
+                                Common indoor plant pests include spider mites, mealybugs, aphids, scale, and fungus gnats.
+                            </p>
+                            <div className="guide-causes">
+                                <div className="guide-causes-title">Signs of Pests:</div>
+                                <ul className="guide-list">
+                                    <li>Visible bugs on leaves or soil</li>
+                                    <li>Sticky residue on leaves (honeydew from aphids/scale)</li>
+                                    <li>Tiny webs between leaves (spider mites)</li>
+                                    <li>White cottony masses (mealybugs)</li>
+                                    <li>Small flies around plant (fungus gnats)</li>
+                                    <li>Yellowing or spotted leaves</li>
+                                </ul>
+                            </div>
+                            <div className="guide-actions">
+                                <div className="guide-actions-title">Suggested Actions:</div>
+                                <ul className="guide-list">
+                                    <li>Isolate affected plant immediately</li>
+                                    <li>Wipe leaves with damp cloth to remove pests</li>
+                                    <li>Spray with insecticidal soap or neem oil solution</li>
+                                    <li>For severe infestations, consider systemic treatment</li>
+                                    <li>Check nearby plants for spread</li>
+                                    <li>Repeat treatment every 5-7 days for 3 weeks</li>
+                                    <li>For fungus gnats, let soil dry out more between waterings</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div className="guide-symptom">
+                            <div className="guide-symptom-title">🪴 When to Re-pot</div>
+                            <p className="guide-symptom-desc">
+                                Plants need larger pots as they grow. Repotting gives roots more space and refreshes the soil.
+                            </p>
+                            <div className="guide-causes">
+                                <div className="guide-causes-title">Signs Plant Needs Repotting:</div>
+                                <ul className="guide-list">
+                                    <li>Roots growing out of drainage holes</li>
+                                    <li>Roots circling around inside pot edge (visible when lifted)</li>
+                                    <li>Water drains very quickly (roots taking up all space)</li>
+                                    <li>Plant drying out much faster than before</li>
+                                    <li>Stunted growth despite proper care</li>
+                                    <li>Soil depleted - pulls away from pot sides</li>
+                                    <li>Top-heavy plant tipping over</li>
+                                </ul>
+                            </div>
+                            <div className="guide-actions">
+                                <div className="guide-actions-title">Repotting Steps:</div>
+                                <ul className="guide-list">
+                                    <li>Choose pot 2 inches larger in diameter</li>
+                                    <li>Ensure new pot has drainage holes</li>
+                                    <li>Gently remove plant, loosen root ball</li>
+                                    <li>Trim any dead or circling roots</li>
+                                    <li>Add fresh potting mix to bottom of new pot</li>
+                                    <li>Place plant and fill sides with soil</li>
+                                    <li>Water thoroughly and place in indirect light for a few days</li>
+                                    <li>Best time: Spring/early summer during growing season</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function PlantCard({ plant, onClick }) {
+            const statusClass = plant.condition === 'Great' ? 'status-great' :
+                              plant.condition === 'Okay' ? 'status-okay' : 'status-attention';
+
+            return (
+                <div className="plant-card" onClick={onClick}>
+                    <div className="plant-card-header">
+                        <div className="plant-name">{plant.name}</div>
+                        <div className="plant-location">{plant.location}</div>
+                    </div>
+                    <div className="plant-card-body">
+                        <span className={`status-badge ${statusClass}`}>
+                            {plant.condition}
+                        </span>
+                        <div className="plant-info">
+                            <div className="plant-info-row">
+                                <span className="plant-info-label">Watering:</span>
+                                <span>{plant.wateringFrequency}</span>
+                            </div>
+                            <div className="plant-info-row">
+                                <span className="plant-info-label">Last Watered:</span>
+                                <span>{plant.lastWatered || 'Not recorded'}</span>
+                            </div>
+                            {plant.actionNeeded && (
+                                <div className="plant-info-row">
+                                    <span className="plant-info-label">Action:</span>
+                                    <span style={{ color: 'var(--warning)' }}>Required</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function PlantFormModal({ plant, roomId, onSave, onClose }) {
+            const [formData, setFormData] = useState(plant || {
+                roomId,
+                plantId: '',
+                name: '',
+                location: '',
+                potSize: '',
+                wateringFrequency: 'Weekly',
+                waterAmount: '',
+                lastWatered: '',
+                condition: 'Great',
+                yellowLeaves: false,
+                dryCrispyLeaves: false,
+                droopingWilting: false,
+                pestsOrDisease: false,
+                pestsExplain: '',
+                needsRepotting: false,
+                extraNotes: '',
+                actionNeeded: ''
+            });
+
+            const handleChange = (field, value) => {
+                setFormData({ ...formData, [field]: value });
+            };
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                onSave(formData);
+            };
+
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2 className="modal-title">
+                                {plant ? 'Edit Plant' : 'Add New Plant'}
+                            </h2>
+                            <button className="close-btn" onClick={onClose}>×</button>
+                        </div>
+                        <div className="modal-body">
+                            <form onSubmit={handleSubmit}>
+                                <div className="form-grid">
+                                    <div className="form-group">
+                                        <label className="form-label">Plant ID</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={formData.plantId}
+                                            onChange={e => handleChange('plantId', e.target.value)}
+                                            placeholder="e.g., L-001"
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label">Plant Name *</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={formData.name}
+                                            onChange={e => handleChange('name', e.target.value)}
+                                            required
+                                            placeholder="e.g., Monstera Deliciosa"
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label">Location *</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={formData.location}
+                                            onChange={e => handleChange('location', e.target.value)}
+                                            required
+                                            placeholder="e.g., Near window, Corner table"
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label">Pot/Container Size</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={formData.potSize}
+                                            onChange={e => handleChange('potSize', e.target.value)}
+                                            placeholder="e.g., 12 inch, Large"
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label">Watering Frequency</label>
+                                        <select
+                                            className="form-select"
+                                            value={formData.wateringFrequency}
+                                            onChange={e => handleChange('wateringFrequency', e.target.value)}
+                                        >
+                                            <option>Weekly</option>
+                                            <option>Bi-weekly</option>
+                                            <option>Every 3 days</option>
+                                            <option>Every 10 days</option>
+                                            <option>Monthly</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label">Water Amount</label>
+                                        <input
+                                            type="text"
+                                            className="form-input"
+                                            value={formData.waterAmount}
+                                            onChange={e => handleChange('waterAmount', e.target.value)}
+                                            placeholder="e.g., 500ml, 2 cups"
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label">Last Watered</label>
+                                        <input
+                                            type="date"
+                                            className="form-input"
+                                            value={formData.lastWatered}
+                                            onChange={e => handleChange('lastWatered', e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label className="form-label">Overall Condition</label>
+                                        <select
+                                            className="form-select"
+                                            value={formData.condition}
+                                            onChange={e => handleChange('condition', e.target.value)}
+                                        >
+                                            <option>Great</option>
+                                            <option>Okay</option>
+                                            <option>Needs Attention</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div className="form-group full-width" style={{ marginTop: '1.5rem' }}>
+                                    <label className="form-label">Health Indicators</label>
+                                    <div className="checkbox-group">
+                                        <label className="checkbox-item">
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.yellowLeaves}
+                                                onChange={e => handleChange('yellowLeaves', e.target.checked)}
+                                            />
+                                            Yellow Leaves
+                                        </label>
+                                        <label className="checkbox-item">
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.dryCrispyLeaves}
+                                                onChange={e => handleChange('dryCrispyLeaves', e.target.checked)}
+                                            />
+                                            Dry/Crispy Leaves
+                                        </label>
+                                        <label className="checkbox-item">
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.droopingWilting}
+                                                onChange={e => handleChange('droopingWilting', e.target.checked)}
+                                            />
+                                            Drooping/Wilting
+                                        </label>
+                                        <label className="checkbox-item">
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.pestsOrDisease}
+                                                onChange={e => handleChange('pestsOrDisease', e.target.checked)}
+                                            />
+                                            Pests or Disease
+                                        </label>
+                                        <label className="checkbox-item">
+                                            <input
+                                                type="checkbox"
+                                                checked={formData.needsRepotting}
+                                                onChange={e => handleChange('needsRepotting', e.target.checked)}
+                                            />
+                                            Needs Re-Potting
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {formData.pestsOrDisease && (
+                                    <div className="form-group full-width">
+                                        <label className="form-label">Pests/Disease Details</label>
+                                        <textarea
+                                            className="form-textarea"
+                                            value={formData.pestsExplain}
+                                            onChange={e => handleChange('pestsExplain', e.target.value)}
+                                            placeholder="Describe the pests or disease..."
+                                        />
+                                    </div>
+                                )}
+
+                                <div className="form-group full-width">
+                                    <label className="form-label">Extra Notes</label>
+                                    <textarea
+                                        className="form-textarea"
+                                        value={formData.extraNotes}
+                                        onChange={e => handleChange('extraNotes', e.target.value)}
+                                        placeholder="Any additional observations..."
+                                    />
+                                </div>
+
+                                <div className="form-group full-width">
+                                    <label className="form-label">Actions Needed (one per line)</label>
+                                    <textarea
+                                        className="form-textarea"
+                                        value={formData.actionNeeded}
+                                        onChange={e => handleChange('actionNeeded', e.target.value)}
+                                        placeholder="e.g., Re-pot&#10;Reduce watering&#10;Move to brighter spot"
+                                    />
+                                </div>
+
+                                <div className="form-actions">
+                                    <button type="button" className="btn btn-secondary" onClick={onClose}>
+                                        Cancel
+                                    </button>
+                                    <button type="submit" className="btn btn-primary">
+                                        {plant ? 'Update Plant' : 'Add Plant'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function PlantDetailModal({ plant, onEdit, onDelete, onClose }) {
+            const actions = plant.actionNeeded ? plant.actionNeeded.split('\n').filter(a => a.trim()) : [];
+            
+            return (
+                <div className="modal-overlay" onClick={onClose}>
+                    <div className="modal" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2 className="modal-title">{plant.name}</h2>
+                            <button className="close-btn" onClick={onClose}>×</button>
+                        </div>
+                        <div className="modal-body">
+                            <div className="detail-section">
+                                <h3 className="detail-section-title">Basic Information</h3>
+                                <div className="detail-grid">
+                                    {plant.plantId && (
+                                        <div className="detail-item">
+                                            <div className="detail-label">Plant ID</div>
+                                            <div className="detail-value">{plant.plantId}</div>
+                                        </div>
+                                    )}
+                                    <div className="detail-item">
+                                        <div className="detail-label">Location</div>
+                                        <div className="detail-value">{plant.location}</div>
+                                    </div>
+                                    {plant.potSize && (
+                                        <div className="detail-item">
+                                            <div className="detail-label">Pot Size</div>
+                                            <div className="detail-value">{plant.potSize}</div>
+                                        </div>
+                                    )}
+                                    <div className="detail-item">
+                                        <div className="detail-label">Overall Condition</div>
+                                        <div className="detail-value">{plant.condition}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="detail-section">
+                                <h3 className="detail-section-title">Watering & Care</h3>
+                                <div className="detail-grid">
+                                    <div className="detail-item">
+                                        <div className="detail-label">Frequency</div>
+                                        <div className="detail-value">{plant.wateringFrequency}</div>
+                                    </div>
+                                    {plant.waterAmount && (
+                                        <div className="detail-item">
+                                            <div className="detail-label">Amount</div>
+                                            <div className="detail-value">{plant.waterAmount}</div>
+                                        </div>
+                                    )}
+                                    <div className="detail-item">
+                                        <div className="detail-label">Last Watered</div>
+                                        <div className="detail-value">{plant.lastWatered || 'Not recorded'}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="detail-section">
+                                <h3 className="detail-section-title">Health Status</h3>
+                                <div className="detail-grid">
+                                    <div className="detail-item">
+                                        <div className="detail-label">Yellow Leaves</div>
+                                        <div className="detail-value">{plant.yellowLeaves ? 'Yes' : 'No'}</div>
+                                    </div>
+                                    <div className="detail-item">
+                                        <div className="detail-label">Dry/Crispy Leaves</div>
+                                        <div className="detail-value">{plant.dryCrispyLeaves ? 'Yes' : 'No'}</div>
+                                    </div>
+                                    <div className="detail-item">
+                                        <div className="detail-label">Drooping/Wilting</div>
+                                        <div className="detail-value">{plant.droopingWilting ? 'Yes' : 'No'}</div>
+                                    </div>
+                                    <div className="detail-item">
+                                        <div className="detail-label">Pests/Disease</div>
+                                        <div className="detail-value">{plant.pestsOrDisease ? 'Yes' : 'No'}</div>
+                                    </div>
+                                    <div className="detail-item">
+                                        <div className="detail-label">Needs Re-Potting</div>
+                                        <div className="detail-value">{plant.needsRepotting ? 'Yes' : 'No'}</div>
+                                    </div>
+                                </div>
+                                {plant.pestsOrDisease && plant.pestsExplain && (
+                                    <div style={{ marginTop: '1rem', padding: '1rem', background: 'var(--cream)', borderRadius: '6px' }}>
+                                        <div className="detail-label">Pests/Disease Details</div>
+                                        <div style={{ marginTop: '0.5rem' }}>{plant.pestsExplain}</div>
+                                    </div>
+                                )}
+                            </div>
+
+                            {actions.length > 0 && (
+                                <div className="detail-section">
+                                    <h3 className="detail-section-title">Actions Needed</h3>
+                                    <div className="actions-list">
+                                        {actions.map((action, idx) => (
+                                            <div key={idx} className="action-item">{action}</div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {plant.extraNotes && (
+                                <div className="detail-section">
+                                    <h3 className="detail-section-title">Notes</h3>
+                                    <div style={{ padding: '1rem', background: 'var(--cream)', borderRadius: '6px', whiteSpace: 'pre-wrap' }}>
+                                        {plant.extraNotes}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="form-actions">
+                                <button className="btn btn-danger" onClick={onDelete}>
+                                    Delete Plant
+                                </button>
+                                <button className="btn btn-primary" onClick={onEdit}>
+                                    Edit Plant
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
